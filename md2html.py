@@ -2,55 +2,101 @@ import sys
 import os
 import re
 
-# def convert_emphasis(str):
+def convert_emphasis(text: str):
+    lines = text.split('\n')
 
+    one_star_pattern = re.compile(r'\*(\S|\S.*?\S)\*')
+    two_star_pattern = re.compile(r'\*\*(\S|\S.*?\S)\*\*')
+    three_star_pattern = re.compile(r'\*\*\*(\S|\S.*?\S)\*\*\*')
+
+    one_score_pattern = re.compile(r'\b_(\S|\S.*?\S)_\b')
+    two_score_pattern = re.compile(r'\b__(\S|\S.*?\S)__\b')
+    three_score_pattern = re.compile(r'\b___(\S|\S.*?\S)___\b')
+
+    text = re.sub(three_star_pattern, r'<em><strong>\1</strong></em>', text)
+    text = re.sub(two_star_pattern, r'<strong>\1</strong>', text)
+    text = re.sub(one_star_pattern, r'<em>\1</em>', text)
+
+    text = re.sub(three_score_pattern, r'<em><strong>\1</strong></em>', text)
+    text = re.sub(two_score_pattern, r'<strong>\1</strong>', text)
+    text = re.sub(one_score_pattern, r'<em>\1</em>', text)
+
+    return text
+    
 # def convert_paragraph(str):
 
 def convert_headings(text: str):
+    hashTag_pattern = re.compile(r'^(?P<hashTags>#{1,6})\s+(?P<header>.*)')
+    alternate_pattern = re.compile(r'^(={2,})$|^(-{2,})$')
     
-    lines = text.split('\n')
+    lines = text.split("\n")
+    converted_lines = []
+    i = 0
+    proccess_headings = True
+    while i < len(lines):
+        line = lines[i]
+        if not proccess_headings:
+            converted_lines.append(line)
+            i += 1
+            continue
 
-    hashTag_pattern = re.compile(r'^(?P<hashTags>#{1,6})\s+(?P<header>.*)$')
-    alternate_pattern = re.compile(r'^(={2,})$|^(-{2,})')
-    converted_strings = []
-    for i, line in enumerate(lines):
         match = re.match(hashTag_pattern, line)
+
         if match:
             level = len(match.group("hashTags"))
-            content = match.group("header")
-            line = re.sub(hashTag_pattern, f"<h{level}>{content}</h{level}>", line)
-            converted_strings.append(line)
-            continue
+            content = match.group("header").strip()
 
-        match = re.match(alternate_pattern, lines[i])
-        if match:
-            level = 1 if line[0] == '=' else 2
+            head_id = content.replace(' ', '-').replace('*', '').replace('_', '')
 
-            content = ""
-            if i>0:
-                content = lines[i-1]
-                converted_strings.pop()
+            line = re.sub(hashTag_pattern, f'<h{level} id="{head_id}">{content}</h{level}>', line)
+            converted_lines.append(line)
 
-            converted_strings.append(f"<h{level}>{content}<h{level}>")
-            continue
+        elif i+1 < len(lines) and re.match(alternate_pattern, lines[i+1]):
+            next_line = lines[i+1]
 
-        converted_strings.append(line)
+            level = 1 if next_line[0] == '=' else 2
+            content = line.strip()
 
-    return "\n".join(converted_strings)
+            head_id = content.replace(' ', '-').replace('*', '').replace('_', '')
+
+            converted_lines.append(f'<h{level} id="{head_id}">{content}</h{level}>')
+            i += 1
+        else:
+            proccess_headings = False
+            converted_lines.append(line)
+
+        i += 1
+
+    return "\n".join(converted_lines)
 
 # def convert_ordered_list(str):
 
 # def convert_unordered_list(str):
 
-# def convert_code(str):
+def convert_code(text: str):
+    code_pattern = re.compile(r'`(.*?)`')
+    text = re.sub(code_pattern, r'<code>\1</code>', text)
+    return text
 
-# def convert_link(str):
+def convert_link(text: str):
+    url_pattern = re.compile(r'\[(.*?)\]\((.*?)\)')
+    text = re.sub(url_pattern, r'<a href="\2">\1</a>', text)
+    return text
 
 def convert(text: str):
     
+    blocks = text.split("\n\n")
 
-    text = convert_headings(text)
-    return text
+    converted_blocks = []
+    for block in blocks:
+        block = convert_headings(block)
+        block = convert_emphasis(block)
+        block = convert_code(block)
+        block = convert_link(block)
+
+        converted_blocks.append(block)
+
+    return "\n\n".join(converted_blocks)
 
 def main():
     # md2html.py input.md output.html

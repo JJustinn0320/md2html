@@ -91,15 +91,15 @@ def convert_paragraph(text: str):
         return cleaned_content
 
     for i, line in enumerate(lines):
-        print('['+line+']')
+        # print('['+line+']')
         match = re.match(html_tag_pattern, line)
         if not match: # paragraph start
             if len(converted_lines)-1 >= 0:
                 prev_item = converted_lines[len(converted_lines)-1]
-                print(prev_item)
+                # print(prev_item)
                 para_match = re.match(paragraph_tag_pattern, prev_item)
                 if para_match:
-                    print(para_match)
+                    # print(para_match)
                     content = para_match.group('content')
                     converted_lines.pop()
                     line = clean_line(line)
@@ -143,7 +143,7 @@ def convert_paragraph(text: str):
 def convert_headings(text: str):
     hashTag_pattern = re.compile(r'^(?P<hashTags>#{1,6})\s+(?P<header>.*)')
     alternate_pattern = re.compile(r'^(={2,})$|^(-{2,})$')
-    print(text)
+    # print(text)
     lines = text.split("\n")
     converted_lines = []
     i = 0
@@ -177,7 +177,7 @@ def convert_headings(text: str):
             converted_lines.append(line)
 
         i += 1
-    print("\n".join(converted_lines))
+    # print("\n".join(converted_lines))
     return "\n".join(converted_lines)
 
 # fix; right now its assuming each list item is one liner

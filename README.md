@@ -6,7 +6,7 @@
 * Nested lists not supported
 * Nested conversions not fully supported. ie `***bold** italised*` should convert to `<em><strong>bold</strong> italised</em>` but doesnt
 * Horizontal Rules, Blockquotes, Images, Muilti line code blocks, Line breaks, etc are not supported
-* Text in code blocks not protected from further conversions. `**bold**` will be converted even tho its in a code block
+* Text in code blocks not protected from further conversions. ``**bold**`` will be converted even tho its in a code block
 * Links arent verified or checked that they have been properly encoded
 * Special characters like 'greater than' or 'less than' are left as is and not properly esacped in the final html
 * HTML Tags embedding aren't supported. Some tags like `<h>, <ol>, <li>` are just assumed be valid and others arent proccessed and will be surrounded by paragraph tags
